@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bistro Express 1974</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="galley-topbar" aria-label="Galley Controls">
+      <div class="brand-lockup">
+        <span class="car-badge" aria-hidden="true">WAGON-LITS 1974</span>
+        <h1 class="brand-title">Bistro Express 1974</h1>
+      </div>
+
+      <div class="hud-readouts" aria-live="polite">
+        <div class="readout-pill">
+          <span class="readout-label">Shift</span>
+          <span class="readout-value" id="hud-timer">02:30</span>
+        </div>
+        <div class="readout-pill">
+          <span class="readout-label">Tips</span>
+          <span class="readout-value" id="hud-tips">$0</span>
+        </div>
+        <div class="readout-pill">
+          <span class="readout-label">Served</span>
+          <span class="readout-value" id="hud-served">0</span>
+        </div>
+        <div class="readout-pill curve-pill" id="hud-curve-pill">
+          <span class="readout-label">Track</span>
+          <span class="readout-value" id="hud-curve">Steady</span>
+        </div>
+      </div>
+
+      <div class="topbar-actions">
+        <button type="button" class="ctrl-btn" id="btn-mute" aria-pressed="false">
+          Sound: On
+        </button>
+        <button type="button" class="ctrl-btn" id="btn-motion" aria-pressed="false">
+          Motion: Full
+        </button>
+        <button type="button" class="ctrl-btn ctrl-btn-brass" id="btn-pause" disabled>
+          Pause (Esc)
+        </button>
+      </div>
+    </header>
+
+    <main class="stage-area">
+      <div class="stage-frame" id="stage-frame">
+        <canvas
+          id="galley-canvas"
+          width="1280"
+          height="720"
+          aria-label="Bistro Express 1974 Train Galley"
+        ></canvas>
+
+        <!-- Accessible Interactive Controls Layer -->
+        <div class="a11y-dock" aria-label="Quick Station Controls">
+          <div class="a11y-group" aria-label="Pantry Ingredients">
+            <button type="button" class="station-btn" data-action="ingredient" data-id="brioche">1 Brioche</button>
+            <button type="button" class="station-btn" data-action="ingredient" data-id="ham">2 Ham</button>
+            <button type="button" class="station-btn" data-id="egg">3 Egg</button>
+            <button type="button" class="station-btn" data-id="mushroom">4 Mushroom</button>
+            <button type="button" class="station-btn" data-id="tomato">5 Tomato</button>
+            <button type="button" class="station-btn" data-id="beef">6 Beef</button>
+            <button type="button" class="station-btn" data-id="cheese">7 Cheese</button>
+            <button type="button" class="station-btn" data-id="cream">8 Cream</button>
+            <button type="button" class="station-btn" data-id="butter">9 Butter</button>
+          </div>
+          <div class="a11y-group" aria-label="Galley Stations">
+            <button type="button" class="station-btn station-btn-brass" data-action="skillet">Skillet (Q)</button>
+            <button type="button" class="station-btn station-btn-brass" data-action="saucepan">Saucepan (W)</button>
+            <button type="button" class="station-btn station-btn-brass" data-action="board">Board (A)</button>
+            <button type="button" class="station-btn station-btn-brass" data-action="plate">Pass (S)</button>
+            <button type="button" class="station-btn station-btn-gold" data-action="bell">Bell (Space)</button>
+            <button type="button" class="station-btn station-btn-gold" data-action="brace">Brace (B)</button>
+            <button type="button" class="station-btn" data-action="clear-board">Clear Board (X)</button>
+          </div>
+        </div>
+
+        <!-- Title Overlay -->
+        <section
+          class="modal-overlay"
+          id="overlay-title"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="title-heading"
+        >
+          <div class="modal-card modal-card-title">
+            <p class="modal-eyebrow">Night Express Car 04, Paris to Milan</p>
+            <h2 id="title-heading" class="modal-title">Bistro Express 1974</h2>
+            <p class="modal-subtitle">
+              Run the dining-car galley during the 02:30 evening dinner rush. Cook layered bistro plates on cast-iron stoves, plate to order, and pull the Brace lever before track curves.
+            </p>
+
+            <div class="menu-preview-grid" aria-label="Evening Menu">
+              <div class="menu-chip">
+                <strong>Continental Croque</strong>
+                <span>Toasted Brioche + Melted Cheese + Seared Ham</span>
+              </div>
+              <div class="menu-chip">
+                <strong>Alpine Mushroom Omelette</strong>
+                <span>Beaten Egg + Sauteed Mushroom + Herb Butter</span>
+              </div>
+              <div class="menu-chip">
+                <strong>Bistro Tomato Bisque</strong>
+                <span>Simmered Tomato + Cream Swirl + Brioche Crouton</span>
+              </div>
+              <div class="menu-chip">
+                <strong>Express Steak Plate</strong>
+                <span>Seared Beef + Sauteed Mushroom + Herb Butter</span>
+              </div>
+            </div>
+
+            <div class="controls-summary">
+              <span><strong>1-9</strong> Pick ingredient</span>
+              <span><strong>Q / W</strong> Skillet / Saucepan</span>
+              <span><strong>A</strong> Assembly Board</span>
+              <span><strong>S</strong> Service Pass</span>
+              <span><strong>Space</strong> Ring Bell &amp; Serve</span>
+              <span><strong>B</strong> Brace for Curve</span>
+            </div>
+
+            <div class="modal-actions">
+              <button type="button" class="primary-btn" id="btn-start-shift">
+                Start Dinner Shift
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Pause Overlay -->
+        <section
+          class="modal-overlay"
+          id="overlay-pause"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="pause-heading"
+          hidden
+        >
+          <div class="modal-card">
+            <p class="modal-eyebrow">Galley Hold</p>
+            <h2 id="pause-heading" class="modal-title">Shift Paused</h2>
+            <p class="modal-subtitle">
+              Stoves, order timers, and carriage motion are paused. Resume when ready to continue service.
+            </p>
+            <div class="modal-actions">
+              <button type="button" class="primary-btn" id="btn-resume-shift">
+                Resume Shift
+              </button>
+              <button type="button" class="secondary-btn" id="btn-restart-from-pause">
+                Restart Shift
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- End-of-Shift Ledger Overlay -->
+        <section
+          class="modal-overlay"
+          id="overlay-summary"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="summary-heading"
+          hidden
+        >
+          <div class="modal-card modal-card-ledger">
+            <p class="modal-eyebrow">Service Complete</p>
+            <h2 id="summary-heading" class="modal-title">End-of-Shift Ledger</h2>
+            <p class="modal-subtitle" id="summary-verdict">
+              Dinner service concluded on schedule.
+            </p>
+
+            <dl class="ledger-grid">
+              <div class="ledger-row">
+                <dt>Dishes Served</dt>
+                <dd id="sum-served">0</dd>
+              </div>
+              <div class="ledger-row">
+                <dt>Tips Earned</dt>
+                <dd id="sum-tips">$0</dd>
+              </div>
+              <div class="ledger-row">
+                <dt>Steady Service Curve Bonuses</dt>
+                <dd id="sum-curves">0</dd>
+              </div>
+              <div class="ledger-row">
+                <dt>Orders Expired</dt>
+                <dd id="sum-expired">0</dd>
+              </div>
+              <div class="ledger-row">
+                <dt>Burnt Items</dt>
+                <dd id="sum-burnt">0</dd>
+              </div>
+              <div class="ledger-row">
+                <dt>Best Streak</dt>
+                <dd id="sum-streak">0</dd>
+              </div>
+            </dl>
+
+            <div class="modal-actions">
+              <button type="button" class="primary-btn" id="btn-next-shift">
+                Run Next Shift
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Error Fallback Overlay -->
+        <section
+          class="modal-overlay"
+          id="overlay-error"
+          role="alertdialog"
+          aria-modal="true"
+          aria-labelledby="error-heading"
+          hidden
+        >
+          <div class="modal-card">
+            <p class="modal-eyebrow">Galley Hardware Notice</p>
+            <h2 id="error-heading" class="modal-title">Display or Audio Unavailable</h2>
+            <p class="modal-subtitle" id="error-message">
+              Your browser could not initialize the 2D Canvas galley display. Please enable HTML5 Canvas in a desktop browser and reload.
+            </p>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script src="audio.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
